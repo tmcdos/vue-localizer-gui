@@ -310,7 +310,11 @@ export default
         });
         this.jsonData = 'data:application/json;charset=utf-8,' + JSON.stringify(template);
         const link = this.$refs.link;
-        this.$nextTick(() => link.click());
+        this.$nextTick(() =>
+        {
+          link.click();
+          this.modified = false;
+        });
       },
       updateMessage (item, lang)
       {
