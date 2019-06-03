@@ -308,7 +308,7 @@ export default
             });
           }
         });
-        this.jsonData = 'data:application/json;charset=utf-8,' + JSON.stringify(template, null, 2);
+        this.jsonData = 'data:application/json;charset=utf-8;base64,' + btoa(JSON.stringify(template, null, 2));
         const link = this.$refs.link;
         this.$nextTick(() =>
         {
