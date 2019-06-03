@@ -308,12 +308,12 @@ export default
             });
           }
         });
-        this.jsonData = 'data:application/json;charset=utf-8;base64,' + btoa(JSON.stringify(template, null, 2));
+        this.jsonData = 'data:application/json;charset=utf-8;base64,' + Buffer.from(JSON.stringify(template, null, 2)).toString('base64');
         const link = this.$refs.link;
         this.$nextTick(() =>
         {
           link.click();
-          this.modified = false;
+          this.$root.modified = false;
         });
       },
       updateMessage (item, lang)
