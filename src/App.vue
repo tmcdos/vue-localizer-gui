@@ -6,7 +6,7 @@
         <v-chip v-if="$root.modified" label color="pink" text-color="white" class="ml-4" style="font-size: 18px;">Modified</v-chip>
       </v-toolbar>
       <v-content>
-        <v-layout>
+        <v-layout style="max-height: 100%;">
           <v-navigation-drawer app clipped>
             <v-layout row justify-center class="pt-2 pb-2 grey lighten-4">
               <v-btn color="success" @click="saveJson">Save JSON</v-btn>
@@ -67,16 +67,16 @@
             <input id="messages" ref="file" type="file" accept="application/json" class="link-download" @change="importLocales">
           </v-navigation-drawer>
           <!-- Localized messages -->
-          <v-flex class="pa-3">
-            <v-card class="elevation-0">
-              <v-card-title>
+          <v-flex>
+            <v-layout column class="pa-3" style="max-height: 100%;">
+              <div class="search_panel pb-2">
                 <v-spacer>
                   <span class="white--text warning pl-2 pr-2 pt-1 pb-1 ml-3">HINT &mdash; click inside cells to edit localizations inline</span>
                 </v-spacer>
-                <v-text-field v-model.trim="search" append-icon="search" label="Search" single-line hide-details clearable @keydown.esc="search = ''"/>
+                <v-text-field v-model.trim="search" append-icon="search" label="Search" single-line hide-details clearable class="pt-0 mt-0" @keydown.esc="search = ''"/>
                 <v-spacer />
-              </v-card-title>
-              <v-data-table :headers="headers" :items="sortedItems" :search="search" class="striped_table cell_divide fixed_table" hide-actions>
+              </div>
+              <v-data-table :headers="headers" :items="sortedItems" :search="search" class="striped_table cell_divide fixed_table" :rows-per-page-items="listSize" :pagination.sync="pagination">
                 <template slot="items" slot-scope="props">
                   <td>
                     <v-icon v-if="props.item.error" color="error">error</v-icon>
@@ -84,14 +84,14 @@
                     {{ props.item.name }}
                   </td>
                   <td v-for="lang in langList.filter(item => item.enabled)" :key="lang.locale">
-                    <v-edit-dialog :return-value.sync="props.item[lang.locale]" lazy @save="updateMessage(props.item,lang.locale)">
+                    <v-edit-dialog :return-value.sync="props.item[lang.locale]" lazy large @save="updateMessage(props.item,lang.locale)">
                       {{ props.item.locales[lang.locale] }}
                       <v-text-field slot="input" v-model.trim="localization" label="Localization" single-line @focus="localization = props.item.locales[lang.locale]" />
                     </v-edit-dialog>
                   </td>
                 </template>
               </v-data-table>
-            </v-card>
+            </v-layout>
           </v-flex>
         </v-layout>
       </v-content>
@@ -148,8 +148,17 @@ export default
           sortable: false,
           value: 'name',
         },
+      listSize: [10, 25, 50, 100],
       search: '',
       localization: '',
+      pagination:
+        {
+          descending: false,
+          sortBy: '',
+          rowsPerPage: 50,
+          page: 1,
+          totalItems: 0,
+        }
     }
   },
   computed:
@@ -238,8 +247,8 @@ export default
             list.push({
               name: key,
               locales: item,
-              error: this.langList.length !== vals.length,
-              warn: vals.map(v => v.toLowerCase()).filter((value, index, self) => self.indexOf(value) === index).length !== vals.length,
+              error: this.langList.length !== vals.length, // the key is missing from the locale
+              warn: vals.map(v => v.toLowerCase()).filter((value, index, self) => self.indexOf(value) === index).length !== vals.length, // matching translation for 1 or more of the locales
             });
           }
           this.stringList = list;
@@ -386,11 +395,6 @@ export default
     height: 100vh;
   }
 
-  .v-content__wrap
-  {
-    overflow: auto;
-  }
-
   main
   {
     height: 100%;
@@ -410,6 +414,13 @@ export default
     margin-left: 0;
   }
 
+  .fixed_table
+  {
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+  }
+
   .fixed_table thead th
   {
     position: sticky;
@@ -420,7 +431,7 @@ export default
   .fixed_table .v-table__overflow
   {
     overflow-y: auto !important;
-    max-height: calc(100vh - 180px);
+    flex: 1 1 auto;
   }
 
   .striped_table tbody tr:nth-child(odd)
@@ -444,6 +455,13 @@ export default
   {
     vertical-align: bottom;
   }
+
+  .search_panel
+  {
+    display: flex;
+    align-items: center;
+  }
+
 </style>
 
 <style lang="stylus">
